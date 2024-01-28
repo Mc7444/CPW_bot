@@ -25,7 +25,6 @@ def insert_text_and_type(message, message_group, reply, user_id,user_type="bot")
         if(user_type == "contacter"):
             # คำสั่ง SQL สำหรับเพิ่มข้อมูล
             sql_command = "INSERT INTO contacter_message (message_id,message, message_group, reply, c_id) VALUES (UUID(), %s, %s, %s, %s)"
-        
             # ทำการ execute คำสั่ง SQL
             db_cursor.execute(sql_command, (message, message_group, int(reply), user_id))
         elif(user_type == "admin"):  ##ยังทำไม่ได้ทำๆไวก่อน อย่าพึ่งไปสนใจ
@@ -43,7 +42,7 @@ def insert_text_and_type(message, message_group, reply, user_id,user_type="bot")
         connection.close()
 
         print("Insertion successful.")
-        update_interact_contacter(user_id,"contacter")
+        update_interact_contacter(user_id,user_type)
         
     except Exception as e:
         connection.rollback()
@@ -61,7 +60,7 @@ def search_contacter(c_id):
         db_cursor.execute(sql_command, (c_id,))
 
         res = db_cursor.fetchall()
-        print(f"Search result {res}")
+        print(f"search_contacter result {res}")
         return res
         # connection.close()
 
@@ -96,7 +95,7 @@ def update_interact_contacter(c_id,user_type):
         if(user_type == "contacter"):
             # คำสั่ง SQL สำหรับดึงเวลลาที่มีการติดต่อล่าสุดของcontacter
             sql_command = "SELECT max(last_interact) FROM `contacter_message` WHERE c_id = %s"
-        elif(user_type == "admin"):
+        elif(user_type in ["admin","bot"]):
             sql_command = "SELECT max(last_interact) FROM `admin_message` WHERE c_id = %s"
     
         # ทำการ execute คำสั่ง SQL
