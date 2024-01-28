@@ -1,4 +1,0 @@
-cd C:\Users\thungpang
-venv\Scripts\activate
-cd Documents\GitHub\cpw_chatbot
-python main.py
