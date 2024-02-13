@@ -3,6 +3,7 @@ from package.sql_connector import *
 from package.nlp_function import *
 from app import *
 import joblib
+#from bag_of_word import *
 
 # LOAD SEGMENTATION MODEL
 # 0:Negative 1:Positive 2:Question
@@ -35,7 +36,7 @@ def split_text_ai(message):
 def classifySegment(text):
     print(f"\n\nMODEL TYPE _____{type(segment_model)} " )
     print(f"\n\nvec TYPE _____{type(vectorizer_segment)} ")
- 
+
     if "สวัสดี" in text:
         feedback = "โรงเรียนชลประทานสวัสดีค่ะ ต้องการติดต่อด้านไหนคะ"
         return (feedback,"Greeting",True)
@@ -56,7 +57,7 @@ def classifySegment(text):
     else:
         print('Question Group')
         return classifyQuestion(text)
-
+        
 
 # FUNCTION QUESTION MODEL
 def classifyQuestion(text):
@@ -69,6 +70,7 @@ def classifyQuestion(text):
     print(f"Prediction: {question_type}")
 
     menu = " "
+    
     if question_type == 1:      ### type 1 == ฝ่ายวิชาการ / โครงการพิเศษ / EP ###
         menu = "คุณต้องการติดต่อบริการด้านอะไร\n 1.ตารางเรียน\n 2.ตารางสอบ\n 3.หลักสูตร\n 4.ฟอร์มแบบคำร้องขอหลักฐานการศึกษา\n 5.อื่นๆ ติดต่อสอบถามเพิ่มเติม"
     elif question_type == 2:    ### type 2 == ฝ่ายโภชนาการ / พัสดุ / สหกรณ์ ### 
@@ -84,5 +86,8 @@ def classifyQuestion(text):
 
     return (menu,"question",True)
 
-#def answerQuestionType1(choice):
+
+
+
+
     

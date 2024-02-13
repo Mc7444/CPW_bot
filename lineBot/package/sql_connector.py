@@ -1,21 +1,21 @@
 import mysql.connector
 from time import sleep
+
 def connect_to_db():
-    try:
-        connection = mysql.connector.connect(host="localhost",
-                                            user="root",
-                                            password="",
-                                            database="cpw_sql")
-        print("Connected to MySQL database")
-        return connection
-    except Exception as e:
-     print("Error"+e)
-     print("Will reconnection to db in 3 sec.")
-     sleep(3)
-     connect_to_db()
+    while True:
+        try:
+            connection = mysql.connector.connect(host="localhost",
+                                                user="root",
+                                                password="",
+                                                database="cpw_sql")
+            return connection
+        except Exception as e:
+            print("Error: " + str(e))
+            print("Will reconnect to db in 3 sec.")
+            sleep(3)
 
 def format_time(time):
-    return time.strftime('%Y-%m-%d %H:%M:%S')
+    return time.strftime('%Y-%m-%d %H:%M:%S')  #นำเวลาที่ได้รับมาแล้วแปลงเป็นสตริง
 
 def insert_text_and_type(message, message_group, reply, user_id,user_type="bot"):
     try:
@@ -66,6 +66,36 @@ def search_contacter(c_id):
 
     except Exception as e:
         print(f"Error: {e}")
+
+def get_answer(message_group, question_type = None):
+    try:
+        print("Get answer <<")
+        connection = connect_to_db()
+        db_cursor = connection.cursor()
+        '''
+
+        # คำสั่ง SQL สำหรับเพิ่มข้อมูล
+        if question_type is None:
+            sql_command = "SELECT answer FROM `answer_question` WHERE message_group = %s"
+            # ทำการ execute คำสั่ง SQL
+            db_cursor.execute(sql_command, (message_group,))
+        else:
+            sql_command = "SELECT answer FROM `answer_question` WHERE message_group = %s AND question_type = %s"
+            # ทำการ execute คำสั่ง SQL
+            db_cursor.execute(sql_command, (message_group, question_type))
+
+        res = db_cursor.fetchall()
+        print(f"get_answer result {res}")
+        return res
+    '''
+
+    except Exception as e:
+        print(f"Error: {e}")
+
+    finally:
+        if 'connection' in locals() and connection.is_connected():
+            db_cursor.close()
+            connection.close()
 
 def insert_contacter(c_id,c_name):
     try:
@@ -118,6 +148,38 @@ def update_interact_contacter(c_id,user_type):
     except Exception as e:
         connection.rollback()
         print(f"Error: {e}")
+
+
     
+    try:
+        print("Get in get_current_reply_status <<")
+        connection = connect_to_db()
+        db_cursor = connection.cursor()
+
+        # คำสั่ง SQL สำหรับเพิ่มข้อมูล
+        sql_command =  "SELECT cm.last_interact last_interact,'contacter' as role "
+        sql_command+=  "from contacter_message cm " 
+        sql_command+=  "INNER join contacter c " 
+        sql_command+=  "on c.c_id = cm.c_id  "
+        sql_command+=  "WHERE cm.c_id = %s  "
+        sql_command+=  "UNION  "
+        sql_command+=  "SELECT am.last_interact last_interact,'admin' as role  "
+        sql_command+=  "FROM admin_message am  "
+        sql_command+=  "INNER JOIN cpw_user cu on cu.userID=am.userID  "
+        sql_command+=  "WHERE am.c_id = %s ORDER BY last_interact Desc "
+        sql_command+=  "Limit 1"
+        # ทำการ execute คำสั่ง SQL
+        db_cursor.execute(sql_command, (c_id,c_id,))
+
+        res = db_cursor.fetchall()
+        time = res[0][0]
+        user_type = res[0][1]
+        print(f"get_current_reply_status\n user_type: {user_type}\n time: {time}\n")
+        return user_type
+        # connection.close()
+
+    except Exception as e:
+        print(f"Error: {e}")
+
 
 
