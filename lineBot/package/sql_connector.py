@@ -67,35 +67,87 @@ def search_contacter(c_id):
     except Exception as e:
         print(f"Error: {e}")
 
-def get_answer(message_group, question_type = None):
+def get_answer(message_group,main_question_type = None):
     try:
-        print("Get answer <<")
+        print("Get in get_answer <<")
         connection = connect_to_db()
         db_cursor = connection.cursor()
-        '''
 
         # คำสั่ง SQL สำหรับเพิ่มข้อมูล
-        if question_type is None:
+        if message_group != "question":
             sql_command = "SELECT answer FROM `answer_question` WHERE message_group = %s"
             # ทำการ execute คำสั่ง SQL
-            db_cursor.execute(sql_command, (message_group,))
+            db_cursor.execute(sql_command, (message_group))
         else:
             sql_command = "SELECT answer FROM `answer_question` WHERE message_group = %s AND question_type = %s"
             # ทำการ execute คำสั่ง SQL
-            db_cursor.execute(sql_command, (message_group, question_type))
+            db_cursor.execute(sql_command, (message_group, main_question_type))
 
-        res = db_cursor.fetchall()
-        print(f"get_answer result {res}")
-        return res
-    '''
+        res = db_cursor.fetchone()
+        print(f"get_answer result {res[0]}")
+        return res[0]
 
     except Exception as e:
         print(f"Error: {e}")
 
-    finally:
-        if 'connection' in locals() and connection.is_connected():
-            db_cursor.close()
-            connection.close()
+def get_main_question_type(c_id):
+    try:
+        print("Get in get_main_question_type <<")
+        connection = connect_to_db()
+        db_cursor = connection.cursor()
+
+        # คำสั่ง SQL สำหรับเพิ่มข้อมูล
+        sql_command = "select main_question_type from contacter where c_id = %s"
+        # ทำการ execute คำสั่ง SQL
+        db_cursor.execute(sql_command, (c_id,))
+
+        res = db_cursor.fetchone()
+        print(f"get_main_question_type result {res[0]}")
+        return res[0]
+        # connection.close()
+
+    except Exception as e:
+        print(f"Error: {e}")    
+
+def insert_sub_answer(answer,sub_type):
+    try:
+        connection = connect_to_db()
+        db_cursor = connection.cursor()
+
+        
+        sql_command = "INSERT INTO sub_answer (s_answer_id,answer, sub_type) VALUES (UUID(), %s, %s)"
+            # ทำการ execute คำสั่ง SQL
+        db_cursor.execute(sql_command, (answer, sub_type))
+
+        connection.commit()
+        connection.close()
+
+        print("Insertion successful.")
+        
+    except Exception as e:
+        connection.rollback()
+        print(f"Error: {e}")
+
+def update_main_question_type(type,c_id):
+    try:   
+        print("Get in update_main_question_type<<")
+        connection = connect_to_db()
+        db_cursor = connection.cursor()
+
+        
+        sql_command = "UPDATE `contacter` SET `main_question_type`=%s,`last_interact`= NOW() WHERE `c_id`=%s"
+
+            # ทำการ execute คำสั่ง SQL
+        db_cursor.execute(sql_command, (type,c_id))
+
+        connection.commit()
+        connection.close()
+
+        print("Update successful.")
+        
+    except Exception as e:
+        connection.rollback()
+        print(f"Error: {e}")
 
 def insert_contacter(c_id,c_name):
     try:
@@ -149,8 +201,6 @@ def update_interact_contacter(c_id,user_type):
         connection.rollback()
         print(f"Error: {e}")
 
-
-    
     try:
         print("Get in get_current_reply_status <<")
         connection = connect_to_db()

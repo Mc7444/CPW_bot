@@ -37,7 +37,6 @@ def classify_text_type_and_reply(userId,msgTxt):
             insert_contacter(userId,get_user_name(userId))
             print("insert new contacter done.")
         insert_text_and_type(msgTxt, message_group, reply, userId,"contacter")      #push text from contacter to database
-        
         ####USER chat ZONE####
 
         ####BOT chat ZONE####
@@ -46,13 +45,24 @@ def classify_text_type_and_reply(userId,msgTxt):
         insert_text_and_type(feedback, None, None, userId)      #push text from contacter to database
         ####BOT chat ZONE####       
 
+        ###Store main question type in db
+        
+        if(message_group[0:-1] == "question"):
+            main_question_type = message_group[-1:]
+            update_main_question_type(main_question_type,userId)
+            
+
+
+
+
 #function การตอบกลับตามคำถามย่อย
 def reply_subQuestion(userId,msgTxt):
+    main_question_type = get_main_question_type(userId)
     if(msgTxt != "1"):
         replyObj = TextSendMessage(text="ตอบหน่อยเด๋")
     else:
         replyObj = TextSendMessage(text="ตาราง")
-        variable.state  = "admin"
+        # variable.state  = "admin"
 
     line_bot_api.push_message(userId,replyObj)
 
@@ -70,6 +80,7 @@ def event_handle(object):
         if(variable.state == "admin"):
             print(">>in admin")
             classify_text_type_and_reply(userId,msgTxt)
+            
             variable.state  = "contacter"
         elif(variable.state == "contacter"):
             print(">>in contact")

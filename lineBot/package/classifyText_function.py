@@ -34,25 +34,22 @@ def split_text_ai(message):
 
 # FUNCTION SEGMENTATION MODEL
 def classifySegment(text):
-    print(f"\n\nMODEL TYPE _____{type(segment_model)} " )
-    print(f"\n\nvec TYPE _____{type(vectorizer_segment)} ")
 
-    if "สวัสดี" in text:
-        feedback = "โรงเรียนชลประทานสวัสดีค่ะ ต้องการติดต่อด้านไหนคะ"
-        return (feedback,"Greeting",True)
+    #if "สวัสดี" in text:
+    #    feedback = "โรงเรียนชลประทานสวัสดีค่ะ ต้องการติดต่อด้านไหนคะ"
+    #    return (feedback,"Greeting",True)
     
     text_list = vectorizer_segment.transform([text]).reshape(1,-1).todense()  # นำข้อความที่ถูกแบ่งคำแล้ว (text) มาใช้ vectorizer (vectorizer_question) ในการแปลงเป็น vector โดยใช้ transform และ reshape เพื่อเตรียมข้อมูลและแปลงเป็น dense matrix ด้วย todense().
     predictions = segment_model.predict(np.asarray(text_list))                 # ทำนายประเภทของคำถาม (question type) โดยใช้โมเดลที่โหลดมา (question_model) และข้อมูลที่เตรียมไว้ (text_list) โดยใช้ predict 
-    print(f"THIS IS predictions::{predictions}")
 
     # 0:Negative 1:Positive 2:Question
     if(predictions[0]==0): 
         print('Negative Group')
-        feedback = 'ขอบคุณสำหรับคำแนะนำค่ะ ทางโรงเรียนชลประทานวิทยาจะดำเนินการแจ้งให้กับหน่วยงานที่เกี่ยวข้องได้รับทราบค่ะ' 
+        feedback = get_answer("negative")
         return (feedback,"negative",True)
     elif (predictions[0]==1):
         print('Positive Group')
-        feedback ='โรงเรียนชลประทานวิทยา ขอขอบคุณค่ะ'
+        feedback = get_answer("positive")
         return (feedback,"positive",True)
     else:
         print('Question Group')
@@ -61,30 +58,28 @@ def classifySegment(text):
 
 # FUNCTION QUESTION MODEL
 def classifyQuestion(text):
-    print(f"\n\nMODEL TYPE _____{type(question_model)} ")
-    print(f"\n\nvec TYPE _____{type(question_vectorizer)} ")
 
     text_list = vectorizer_question.transform([text]).reshape(1, -1).todense()
     question_predictions = question_model.predict(np.asarray(text_list))
-    question_type = question_predictions[0]
+    question_type = str(question_predictions[0])
     print(f"Prediction: {question_type}")
 
     menu = " "
     
-    if question_type == 1:      ### type 1 == ฝ่ายวิชาการ / โครงการพิเศษ / EP ###
-        menu = "คุณต้องการติดต่อบริการด้านอะไร\n 1.ตารางเรียน\n 2.ตารางสอบ\n 3.หลักสูตร\n 4.ฟอร์มแบบคำร้องขอหลักฐานการศึกษา\n 5.อื่นๆ ติดต่อสอบถามเพิ่มเติม"
-    elif question_type == 2:    ### type 2 == ฝ่ายโภชนาการ / พัสดุ / สหกรณ์ ### 
-        menu = "คุณต้องการติดต่อบริการด้านอะไร\n 1.เมนูอาหารกลางวันประจำสัปดาห์\n 2.สหกรณ์โรงเรียนชลประทานวิทยา\n 3.อื่นๆ ติดต่อสอบถามเพิ่มเติม"
-    elif question_type == 3:    ### type 3 == ฝ่ายปกครอง / กิจการนักเรียน /  กิจกรรมต่างๆ โครงการภายใน-นอก ##
-        menu = "คุณต้องการติดต่อบริการด้านอะไร\n 1.ระเบียบการแต่งกายของนักเรียน \n 2.กิจกรรมนักเรียน\n 3.นักศึกษาวิชาทหาร\n 4.อื่นๆ ติดต่อสอบถามเพิ่มเติม"
-    elif question_type == 4:    ### type 4 == ฝ่ายธุรการ / ฝ่ายบัญชี / บริหาร ###
-        menu = "คุณต้องการติดต่อบริการด้านอะไร\n 1.สมัครเรียน\n 2.สมัครบุคลากร\n 3.ค่าธรรมเนียมการศึกษา\n 4.อื่นๆ ติดต่อสอบถามเพิ่มเติม"
-    elif question_type == 5:    ### type 5 == ศูนย์พัฒนาโรงเรียนดิจิทัล ###
-        menu = "คุณต้องการติดต่อบริการด้านอะไร\n 1.ศูนย์ฝึกว่ายน้ำ\n  2.ระบบชำระเงิน\n 3.ประกาศผลการเรียน\n 4.ระบบรถรับ-ส่ง\n 5.ระบบโรงอาหารอื่นๆ\n 6.ติดต่อสอบถามเพิ่มเติม"
+    if question_type == "1":      ### type 1 == ฝ่ายวิชาการ / โครงการพิเศษ / EP ###
+        menu = get_answer("question",question_type)
+    elif question_type == "2":    ### type 2 == ฝ่ายโภชนาการ / พัสดุ / สหกรณ์ ### 
+        menu = get_answer("question",question_type)
+    elif question_type == "3":    ### type 3 == ฝ่ายปกครอง / กิจการนักเรียน /  กิจกรรมต่างๆ โครงการภายใน-นอก ##
+        menu = get_answer("question",question_type)
+    elif question_type == "4":    ### type 4 == ฝ่ายธุรการ / ฝ่ายบัญชี / บริหาร ###
+        menu = get_answer("question",question_type)
+    elif question_type == "5":    ### type 5 == ศูนย์พัฒนาโรงเรียนดิจิทัล ###
+        menu = get_answer("question",question_type)
     else:                       ### type 0 == ไม่เกี่ยวข้อง ###
-        menu = "รอสักครู่ ฉันจะรีบติดต่อกลับไปให้เร็วที่สุดนะคะ / I’ll get back to you as soon as possible"
+        menu = get_answer("question",question_type)
 
-    return (menu,"question",True)
+    return (menu,"question"+question_type,True)
 
 
 
